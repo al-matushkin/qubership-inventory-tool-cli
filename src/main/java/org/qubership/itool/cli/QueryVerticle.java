@@ -23,6 +23,7 @@ import org.qubership.itool.tasks.FlowTask;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import jakarta.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -48,7 +49,7 @@ public class QueryVerticle extends FlowMainVerticle {
     protected static final Logger LOG = LoggerFactory.getLogger(QueryVerticle.class);
 
     @Resource
-    protected FlowContext flowContext;
+    protected Provider<Graph> graphProvider;
     
     protected Logger getLogger() {
         return LOG;
@@ -91,7 +92,7 @@ public class QueryVerticle extends FlowMainVerticle {
                     p.fail("Dump is empty or not found for step " + step);
                 }
 
-                Graph graph = flowContext.getGraph();
+                Graph graph = graphProvider.get();
                 GraphDumpSupport.restoreFromJson(graph, dump);
                 if (graph.getVertexCount() == 1) {
                     p.fail("Graph is empty for step " + step);
@@ -127,7 +128,7 @@ public class QueryVerticle extends FlowMainVerticle {
                     p.fail("Empty data");
                 }
 
-                Graph graph = flowContext.getProvider(Graph.class).get();
+                Graph graph = graphProvider.get();
                 if (content.startsWith("[")) {
                     loadFromJsonArray(file, graph, p, content);
                 } else {
