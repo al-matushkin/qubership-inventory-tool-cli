@@ -1,0 +1,11 @@
+# Extension Command Provider Service Registration
+#
+# This file is used by Java's ServiceLoader to discover extension command providers.
+# Extensions should create their own META-INF/services/org.qubership.itool.cli.ExtensionCommandProvider
+# file and add their provider class names to it.
+#
+# Example:
+# org.qubership.itool.extension.MyExtensionCommandProvider
+#
+# No core providers are registered here - this file serves as documentation
+# for the extension mechanism.
