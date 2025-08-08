@@ -4,8 +4,13 @@
 # Extensions should create their own META-INF/services/org.qubership.itool.cli.ExtensionCommandProvider
 # file and add their provider class names to it.
 #
-# Example:
-# org.qubership.itool.extension.MyExtensionCommandProvider
+# Core command providers (automatically discovered):
+org.qubership.itool.cli.ExecCommandProvider
+org.qubership.itool.cli.QueryCommandProvider
+org.qubership.itool.cli.extract.ExtractCommandProvider
+org.qubership.itool.cli.obfuscate.ObfuscateCommandProvider
+org.qubership.itool.cli.ci.CiExecCommandProvider
+org.qubership.itool.cli.ci.CiAssemblyCommandProvider
 #
-# No core providers are registered here - this file serves as documentation
-# for the extension mechanism.
+# Example extension provider:
+# org.qubership.itool.extension.MyExtensionCommandProvider

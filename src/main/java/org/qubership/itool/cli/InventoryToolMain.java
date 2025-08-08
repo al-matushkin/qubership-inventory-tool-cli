@@ -16,106 +16,108 @@
 
 package org.qubership.itool.cli;
 
+import org.qubership.itool.cli.ExtensionCommandProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
 
 import java.util.ServiceLoader;
 
 /**
- * Main entry point for the inventory tool CLI application.
+ * Main entry point for the inventory tool CLI application using Picocli.
  *
- * MIGRATION STATUS: This is a placeholder for the Picocli migration.
- *
- * Current Status: - Vert.x CLI is being migrated to Picocli due to breaking changes in Vert.x 5.0.1
- * - Migration guide created: PICOCLI_MIGRATION_GUIDE.md - Proof of concept completed
- *
- * TODO: 1. Add Picocli dependency to pom.xml 2. Implement Picocli-based main class 3. Convert all
- * commands from Vert.x CLI to Picocli 4. Update Maven configuration
- *
- * For now, this delegates to the existing Vert.x launcher.
+ * This class provides the main CLI interface with all available commands.
+ * Commands are registered as subcommands and can be discovered dynamically.
  */
-public class InventoryToolMain {
+@Command(
+    name = "inventory-tool",
+    description = "Inventory tool CLI application",
+    mixinStandardHelpOptions = true,
+    version = "4.0.1"
+)
+public class InventoryToolMain implements java.util.concurrent.Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InventoryToolMain.class);
 
     public static void main(String[] args) {
-        LOGGER.info("=== Inventory Tool CLI ===");
-        LOGGER.info("Migration Status: Vert.x CLI -> Picocli (in progress)");
-        LOGGER.info("See PICOCLI_MIGRATION_GUIDE.md for details");
+        LOGGER.info("=== Inventory Tool CLI (Picocli) ===");
 
-        if (args.length == 0) {
-            LOGGER.info(
-                    "Available commands: exec, query, ci-exec, ci-assembly, obfuscate, extract");
-            LOGGER.info("Example: java -jar inventory-tool.jar exec -l your_login");
-            System.exit(1);
-        }
+        InventoryToolMain app = new InventoryToolMain();
+        CommandLine commandLine = new CommandLine(app);
 
-        // For now, delegate to existing Vert.x launcher
-        // This will be replaced with Picocli implementation
-        try {
-            // Use reflection to avoid compilation issues during migration
-            Class<?> launcherClass = Class.forName("io.vertx.core.Launcher");
-            java.lang.reflect.Method mainMethod = launcherClass.getMethod("main", String[].class);
-            mainMethod.invoke(null, (Object) args);
-        } catch (Exception e) {
-            LOGGER.error("Failed to delegate to Vert.x launcher", e);
-            System.exit(1);
-        }
+        // Discover and register all commands (core + extensions)
+        discoverAllCommands(commandLine);
+
+        int exitCode = commandLine.execute(args);
+        System.exit(exitCode);
+    }
+
+    @Override
+    public Integer call() throws Exception {
+        // This is called when no subcommand is specified
+        LOGGER.info("Available commands: exec, query, ci-exec, ci-assembly, obfuscate, extract");
+        LOGGER.info("Use --help to see available options and commands");
+        return 0;
     }
 
     /**
-     * Discovers and registers extension commands using ServiceLoader. This method will be used when
-     * Picocli is implemented.
+     * Discovers and registers all commands (core + extensions) using ServiceLoader.
      *
      * @param commandLine the CommandLine instance to add subcommands to
      */
-    private static void discoverExtensionCommands(Object commandLine) {
-        LOGGER.debug("Discovering extension commands...");
+    private static void discoverAllCommands(CommandLine commandLine) {
+        LOGGER.debug("Discovering all commands...");
 
         try {
-            ServiceLoader<ExtensionCommandProvider> extensionProviders =
+            ServiceLoader<ExtensionCommandProvider> commandProviders =
                     ServiceLoader.load(ExtensionCommandProvider.class);
 
-            int extensionCount = 0;
-            for (ExtensionCommandProvider provider : extensionProviders) {
+            int commandCount = 0;
+            for (ExtensionCommandProvider provider : commandProviders) {
                 try {
                     String commandName = provider.getCommandName();
-                    Object extensionCommand = provider.createCommand();
+                    Object command = provider.createCommand();
 
-                    LOGGER.debug("Found extension command: {}", commandName);
+                    LOGGER.debug("Found command: {}", commandName);
 
-                    // TODO: When Picocli is implemented, add the command to CommandLine
-                    // commandLine.addSubcommand(commandName, extensionCommand);
+                    // Add the command to Picocli CommandLine
+                    commandLine.addSubcommand(commandName, command);
 
-                    extensionCount++;
+                    commandCount++;
                 } catch (Exception e) {
-                    LOGGER.warn("Failed to load extension command from provider: {}",
+                    LOGGER.warn("Failed to load command from provider: {}",
                             provider.getClass().getName(), e);
                 }
             }
 
-            if (extensionCount > 0) {
-                LOGGER.info("Loaded {} extension command(s)", extensionCount);
+            if (commandCount > 0) {
+                LOGGER.info("Loaded {} command(s)", commandCount);
             } else {
-                LOGGER.debug("No extension commands found");
+                LOGGER.warn("No commands found - check service registration");
             }
 
         } catch (Exception e) {
-            LOGGER.warn("Failed to discover extension commands", e);
+            LOGGER.warn("Failed to discover commands", e);
         }
     }
 
     /**
-     * Gets the list of available commands for help display. This includes both core commands and
-     * discovered extension commands.
+     * Gets the list of available commands for help display by discovering them dynamically.
      *
      * @return array of available command names
      */
     private static String[] getAvailableCommands() {
-        // Core commands
-        String[] coreCommands = {"exec", "query", "ci-exec", "ci-assembly", "obfuscate", "extract"};
+        try {
+            ServiceLoader<ExtensionCommandProvider> commandProviders =
+                    ServiceLoader.load(ExtensionCommandProvider.class);
 
-        // TODO: When Picocli is implemented, also include discovered extension commands
-        return coreCommands;
+            return commandProviders.stream()
+                    .map(provider -> provider.get().getCommandName())
+                    .toArray(String[]::new);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to discover available commands", e);
+            return new String[0];
+        }
     }
 }

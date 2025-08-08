@@ -45,7 +45,7 @@ import java.util.concurrent.Callable;
  *             return new MyExtensionCommand();
  *         }
  *
- *         @Override
+ *         &#64;Override
  *         public String getCommandName() {
  *             return "my-extension";
  *         }

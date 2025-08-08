@@ -41,13 +41,13 @@ public class ExtensionCommandProviderTest {
 
     @Test
     public void testServiceLoaderDiscovery() {
-        // Test that ServiceLoader can discover extension providers
+        // Test that ServiceLoader can discover command providers
         ServiceLoader<ExtensionCommandProvider> providers =
                 ServiceLoader.load(ExtensionCommandProvider.class);
 
         assertNotNull(providers);
 
-        // Count discovered providers (should be 0 in test environment)
+        // Count discovered providers (should be 6 core providers in test environment)
         int providerCount = 0;
         for (ExtensionCommandProvider provider : providers) {
             providerCount++;
@@ -56,9 +56,35 @@ public class ExtensionCommandProviderTest {
             assertNotNull(provider.createCommand());
         }
 
-        // In test environment, no providers should be found
-        assertEquals(0, providerCount,
-                "No extension providers should be found in test environment");
+        // In test environment, we should find 6 core command providers
+        assertEquals(6, providerCount,
+                "Should find 6 core command providers in test environment, found: " + providerCount);
+    }
+
+    @Test
+    public void testCoreCommandsArePresent() {
+        // Test that all core commands are discovered
+        ServiceLoader<ExtensionCommandProvider> providers =
+                ServiceLoader.load(ExtensionCommandProvider.class);
+
+        assertNotNull(providers);
+
+        // Collect all command names
+        java.util.Set<String> commandNames = new java.util.HashSet<>();
+        for (ExtensionCommandProvider provider : providers) {
+            commandNames.add(provider.getCommandName());
+        }
+
+        // Verify all core commands are present
+        assertTrue(commandNames.contains("exec"), "Should find exec command");
+        assertTrue(commandNames.contains("query"), "Should find query command");
+        assertTrue(commandNames.contains("extract"), "Should find extract command");
+        assertTrue(commandNames.contains("obfuscate"), "Should find obfuscate command");
+        assertTrue(commandNames.contains("ci-exec"), "Should find ci-exec command");
+        assertTrue(commandNames.contains("ci-assembly"), "Should find ci-assembly command");
+
+        assertEquals(6, commandNames.size(),
+                "Should find exactly 6 core commands, found: " + commandNames.size());
     }
 
     /**
