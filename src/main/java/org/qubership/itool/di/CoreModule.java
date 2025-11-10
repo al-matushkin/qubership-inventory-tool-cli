@@ -41,6 +41,7 @@ import java.util.Properties;
 
 import static org.qubership.itool.modules.diagram.providers.DiagramProvider.SKINPARAM_BACKGROUND_COLOR_CACHING;
 import static org.qubership.itool.modules.diagram.providers.DiagramProvider.SKINPARAM_BACKGROUND_COLOR_DATABASE;
+// editorconfig-checker-disable-next-line
 import static org.qubership.itool.modules.diagram.providers.DiagramProvider.SKINPARAM_BACKGROUND_COLOR_DEFAULT_COMPONENT;
 import static org.qubership.itool.modules.diagram.providers.DiagramProvider.SKINPARAM_BACKGROUND_COLOR_DEFAULT_DOMAIN;
 import static org.qubership.itool.modules.diagram.providers.DiagramProvider.SKINPARAM_BACKGROUND_COLOR_QUEUE;
