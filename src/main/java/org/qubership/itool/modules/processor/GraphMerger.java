@@ -505,9 +505,8 @@ public class GraphMerger implements MergerApi {
         String newToId = remapNewVertices.getOrDefault(baseToId, baseToId);
         JsonObject targetVertex = targetGraph.getVertex(newToId);
 
-        // Adds a new edge iff no edge with the same Map of properties (except id) exists
-        JsonObject newEdge = deepCopy ? edgeValue.copy() : edgeValue;
-        // Modifies source data in case of shallow copy!
+        // Adds a new edge if no edge with the same Map of properties (except id) exists
+        JsonObject newEdge = edgeValue.copy();
         newEdge.remove(F_ID);
         String newEdgeId = targetGraph.addEdge(sourceVertex, targetVertex, newEdge);
         if (newEdgeId != null) {

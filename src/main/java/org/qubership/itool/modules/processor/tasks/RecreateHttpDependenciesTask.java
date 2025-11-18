@@ -44,6 +44,7 @@ import static org.qubership.itool.modules.graph.Graph.F_MOCK_FLAG;
 import static org.qubership.itool.modules.graph.Graph.F_NAME;
 import static org.qubership.itool.modules.graph.Graph.F_TYPE;
 import static org.qubership.itool.modules.graph.Graph.P_DETAILS_DNS_NAMES;
+import static org.qubership.itool.modules.graph.Graph.V_ROOT;
 import static org.qubership.itool.modules.graph.Graph.V_UNKNOWN;
 import static org.qubership.itool.modules.graph.GraphDataConstants.COMP_DEPENDENCY_TYPES;
 import static org.qubership.itool.modules.graph.GraphDataConstants.NOS_TO_RECOGNIZE;
@@ -73,7 +74,7 @@ public class RecreateHttpDependenciesTask implements GraphProcessorTask {
         LOG.info("Starting task");
 
         List<Map<Object, Object>> componentsWithRawDependencies = graph.traversal()
-            .V().hasType("domain").out()
+            .V(V_ROOT).out().hasType("domain").out()
             .values(
                 "C:/",
                 // Duplicates COMP_DEPENDENCY_TYPES a little
